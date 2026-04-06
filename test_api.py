@@ -1,6 +1,7 @@
 import pytest
 import cpp_api
 import os
+import time
 
 @pytest.mark.parametrize("val, expected", [(2, 4), (10, 100)])
 def test_performance_and_logic(val, expected):
