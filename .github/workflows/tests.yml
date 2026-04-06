@@ -6,15 +6,26 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
       - name: Install dependencies
-        run: pip install pytest pybind11
-        
-      - name: Configure and Build C++
+        # This installs pybind11 on the GitHub Runner's OS
+        run: pip install pybind11 pytest 
+
+      - name: Configure CMake
+        # DO NOT use -Dpybind11_DIR here. 
+        # Since we installed via pip, CMake will find it if your CMakeLists.txt is correct.
         run: |
-          mkdir build && cd build
-          cmake /Users/divyadsouza/anaconda3/lib/python3.11/site-packages/pybind11/share/cmake/pybind11
+          mkdir build
+          cd build
+          cmake .. 
+
+      - name: Build and Run Tests
+        run: |
+          cd build
           make
-          
-      - name: Run Pytest with Profiling
-        run: pytest -s  # -s allows you to see the runtime print statements
+          pytest ../tests/test_api.py
