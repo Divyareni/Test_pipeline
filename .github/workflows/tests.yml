@@ -5,27 +5,29 @@ jobs:
   build-and-test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: '3.12'
 
       - name: Install dependencies
-        # This installs pybind11 on the GitHub Runner's OS
-        run: pip install pybind11 pytest 
+        # This is the missing piece! 
+        # It installs pybind11 so CMake can find it.
+        run: |
+          python -m pip install --upgrade pip
+          pip install pybind11 pytest
 
       - name: Configure CMake
-        # DO NOT use -Dpybind11_DIR here. 
-        # Since we installed via pip, CMake will find it if your CMakeLists.txt is correct.
         run: |
           mkdir build
           cd build
-          cmake .. 
+          cmake ..
 
       - name: Build and Run Tests
         run: |
           cd build
           make
-          pytest ../tests/test_api.py
+          pytest ../test_api.py  # Make sure this path matches your test file location
