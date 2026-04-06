@@ -30,4 +30,6 @@ jobs:
         run: |
           cd build
           make
-          pytest ../test_api.py  # Make sure this path matches your test file location
+          # Tell Python to look in the current directory (build) for the .so file
+          export PYTHONPATH=$PYTHONPATH:$(pwd)
+          pytest ../test_api.py
