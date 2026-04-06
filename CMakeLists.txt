@@ -9,31 +9,42 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(Python COMPONENTS Interpreter Development REQUIRED)
 
 # 3. Dynamically locate pybind11 using the Python interpreter
-# This solves the "Could not find a package configuration file" error
+# Try the modern flag first, then fallback to the legacy flag
 execute_process(
-    COMMAND "${Python_EXECUTABLE}" -m pybind11 --cmake
+    COMMAND "${Python_EXECUTABLE}" -m pybind11 --cmakedir
     OUTPUT_VARIABLE pybind11_DIR
     OUTPUT_STRIP_TRAILING_WHITESPACE
-    RESULT_VARIABLE pybind11_FOUND_RESULT
+    ERROR_QUIET
 )
 
-# Error handling if pybind11 isn't installed in the environment
-if(NOT pybind11_FOUND_RESULT EQUAL 0)
-    message(FATAL_ERROR "pybind11 not found. Please run: pip install pybind11")
+if(NOT pybind11_DIR)
+    execute_process(
+        COMMAND "${Python_EXECUTABLE}" -m pybind11 --cmake
+        OUTPUT_VARIABLE pybind11_DIR
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+        ERROR_QUIET
+    )
 endif()
 
-# 4. Add the discovered path to CMake's search list
+# 4. Check if we actually found a path
+if(NOT pybind11_DIR)
+    message(FATAL_ERROR "pybind11 not found in Python environment. Run: pip install pybind11")
+endif()
+
+# Debug: Print the path in the logs so you can verify it in GitHub Actions
+message(STATUS "Found pybind11 at: ${pybind11_DIR}")
+
+# 5. Add the discovered path to CMake's search list
 list(APPEND CMAKE_PREFIX_PATH "${pybind11_DIR}")
 find_package(pybind11 REQUIRED)
 
-# 5. Define the Python module
+# 6. Define the Python module
 # 'cpp_api' is the name you will use in: import cpp_api
 # 'core.cpp' is your C++ source file
 pybind11_add_module(cpp_api core.cpp)
 
-# 6. Optimization for Performance Profiling
-# In an interview, mention that you use -O3 so your runtime 
-# benchmarks reflect production speeds, not debug speeds.
+# 7. Optimization for Performance Profiling
+# We use -O3 so your runtime benchmarks reflect production speeds
 if(MSVC)
     target_compile_options(cpp_api PRIVATE /O2)
 else()
