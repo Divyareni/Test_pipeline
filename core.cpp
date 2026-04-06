@@ -1,7 +1,7 @@
 #include <pybind11/pybind11.h>
 using namespace std;
 
-namespace py = pybind11
+namespace py = pybind11;
 
 int heavy_computation(int input) {
     return input * input;
