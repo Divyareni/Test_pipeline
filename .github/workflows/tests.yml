@@ -13,7 +13,7 @@ jobs:
       - name: Configure and Build C++
         run: |
           mkdir build && cd build
-          cmake ..
+          cmake /Users/divyadsouza/anaconda3/lib/python3.11/site-packages/pybind11/share/cmake/pybind11
           make
           
       - name: Run Pytest with Profiling
